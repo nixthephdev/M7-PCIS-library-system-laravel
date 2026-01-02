@@ -123,3 +123,22 @@ Follow these steps to set up the project on a local machine.
 git clone <repository-url>
 cd library_system
 composer install
+```
+## 📸 System Screenshots    
+### Login Page
+![Landing Page](screenshots/login.png)
+
+### Landing Page
+![Login Page](screenshots/landing%20page.png)
+
+### Dashboard (Dark Mode)
+![Dashboard](screenshots/dashboard.png)
+
+### Inventory Management
+![Inventory](screenshots/inventory.png)
+
+### Circulation Page
+![Circulation Page](screenshots/circulation.png.png)
+
+### Members Page
+![Members Page](screenshots/members.png)
