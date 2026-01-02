@@ -129,16 +129,16 @@ composer install
 ![Landing Page](screenshots/login.png)
 
 ### Landing Page
-![Login Page](screenshots/landing%20page.png)
+![Login Page](screenshots/landing-page.png)
 
 ### Dashboard (Dark Mode)
 ![Dashboard](screenshots/dashboard.png)
 
 ### Inventory Management
-![Inventory](screenshots/inventory.png)
+![Inventory](screenshots/Inventory.png)
 
 ### Circulation Page
-![Circulation Page](screenshots/circulation.png.png)
+![Circulation Page](screenshots/circulation.png)
 
 ### Members Page
 ![Members Page](screenshots/members.png)
