@@ -125,11 +125,11 @@ cd library_system
 composer install
 ```
 ## 📸 System Screenshots    
-### Login Page
-![Landing Page](screenshots/login.png)
-
 ### Landing Page
-![Login Page](screenshots/landing-page.png)
+![Landing Page](screenshots/landing-page.png)
+
+### Login Page
+![Login Page](screenshots/login.png)
 
 ### Dashboard (Dark Mode)
 ![Dashboard](screenshots/dashboard.png)
