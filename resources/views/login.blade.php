@@ -106,7 +106,7 @@
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <i class="fas fa-envelope text-gray-500"></i>
                     </div>
-                    <input type="email" name="email" class="w-full pl-11 pr-4 py-3.5 rounded-xl glass-input outline-none placeholder-gray-600 font-medium" placeholder="admin@school.edu" required>
+                    <input type="email" name="email" class="w-full pl-11 pr-4 py-3.5 rounded-xl glass-input outline-none placeholder-gray-600 font-medium" placeholder="admin@pcis.edu.ph" required>
                 </div>
             </div>
             
@@ -131,7 +131,7 @@
         <!-- Back Link -->
         <div class="mt-8 text-center">
             <a href="{{ route('home') }}" class="text-sm font-semibold text-gray-500 hover:text-white transition-colors">
-                &larr; Back to Library Portal
+                &larr; Back to Landing Page
             </a>
         </div>
     </div>

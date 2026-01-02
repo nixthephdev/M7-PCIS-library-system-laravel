@@ -77,7 +77,7 @@
             <!-- Badge -->
             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8 animate-float">
                 <span class="w-2 h-2 rounded-full bg-[#EF4444] animate-pulse"></span>
-                <span class="text-sm font-semibold tracking-widest uppercase text-gray-300">Official Library Portal</span>
+                <span class="text-sm font-semibold tracking-widest uppercase text-gray-300">Official Library Management System</span>
                 <span class="w-2 h-2 rounded-full bg-[#2563EB] animate-pulse"></span>
             </div>
 
@@ -102,7 +102,7 @@
                     </a>
                 @else
                     <a href="{{ route('login') }}" class="w-full md:w-auto px-10 py-5 bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] rounded-2xl font-bold text-lg shadow-lg hover:shadow-blue-500/50 hover:-translate-y-1 transition-all">
-                        Access Portal
+                        Access Library System
                     </a>
                 @endauth
             </div>
