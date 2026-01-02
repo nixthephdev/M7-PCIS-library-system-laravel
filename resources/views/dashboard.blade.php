@@ -1,3 +1,4 @@
+
 @extends('layout')
 
 @section('content')
@@ -17,6 +18,7 @@
     /* Table Text */
     body.light-mode .text-white { color: #0F172A !important; }
     body.light-mode .text-slate-400 { color: #64748B !important; }
+    body.light-mode .text-slate-300 { color: #94a3b8 !important; }
 </style>
 
 <div class="space-y-8">
@@ -84,7 +86,8 @@
                 </div>
                 <span class="stat-label text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Fines</span>
             </div>
-            <h2 class="stat-value text-4xl font-black text-white">${{ number_format($totalFines, 2) }}</h2>
+            <!-- Shows collected + pending fines combined -->
+            <h2 class="stat-value text-4xl font-black text-white">₱{{ number_format($totalFines, 2) }}</h2>
         </div>
     </div>
 
@@ -110,19 +113,17 @@
                         @foreach($recentActivities as $activity)
                         <tr class="hover:bg-white/5 transition-colors">
                             <td class="px-6 py-4">
-    <div class="flex items-center gap-3">
-        <!-- AVATAR LOGIC -->
-        @if($activity->user->avatar)
-            <img src="{{ asset('storage/' . $activity->user->avatar) }}" class="w-8 h-8 rounded-full object-cover border border-white/10 shadow-sm">
-        @else
-            <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white">
-                {{ substr($activity->user->name, 0, 1) }}
-            </div>
-        @endif
-        
-        <span class="text-sm font-bold text-white">{{ $activity->user->name }}</span>
-    </div>
-</td>
+                                <div class="flex items-center gap-3">
+                                    @if($activity->user->avatar)
+                                        <img src="{{ asset('storage/' . $activity->user->avatar) }}" class="w-8 h-8 rounded-full object-cover border border-white/10 shadow-sm">
+                                    @else
+                                        <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white">
+                                            {{ substr($activity->user->name, 0, 1) }}
+                                        </div>
+                                    @endif
+                                    <span class="text-sm font-bold text-white">{{ $activity->user->name }}</span>
+                                </div>
+                            </td>
                             <td class="px-6 py-4">
                                 @if($activity->returned_at)
                                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20">
@@ -156,16 +157,29 @@
             @if($overdueList->count() > 0)
                 <div class="space-y-4">
                     @foreach($overdueList as $overdue)
-                    <div class="p-3 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-bold text-white">{{ $overdue->user->name }}</p>
-                            <p class="text-xs text-red-300 truncate w-40">{{ $overdue->bookCopy->book->title }}</p>
+                        @php
+                            // Calculate fine for this specific student on the fly
+                            $days = \Carbon\Carbon::now()->diffInDays($overdue->due_date);
+                            $days = $days == 0 ? 1 : $days;
+                            $currentFine = $days * 5;
+                        @endphp
+
+                        <div class="p-3 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-between group hover:bg-red-500/20 transition-colors">
+                            <div>
+                                <p class="text-sm font-bold text-white">{{ $overdue->user->name }}</p>
+                                <p class="text-[10px] text-red-300 uppercase tracking-wide mb-1">
+                                    ID: {{ $overdue->user->student_id ?? 'N/A' }}
+                                </p>
+                                <p class="text-xs text-slate-400 truncate w-32">{{ $overdue->bookCopy->book->title }}</p>
+                            </div>
+                            <div class="text-right">
+                                <!-- SHOW THE FINE AMOUNT -->
+                                <p class="text-lg font-black text-red-500">₱{{ number_format($currentFine, 2) }}</p>
+                                <p class="text-[10px] text-red-300">
+                                    {{ \Carbon\Carbon::parse($overdue->due_date)->diffForHumans() }}
+                                </p>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <p class="text-xs font-bold text-red-400">Due</p>
-                            <p class="text-xs text-white">{{ \Carbon\Carbon::parse($overdue->due_date)->format('M d') }}</p>
-                        </div>
-                    </div>
                     @endforeach
                 </div>
             @else

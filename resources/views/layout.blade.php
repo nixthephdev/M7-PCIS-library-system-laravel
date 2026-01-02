@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>M7 PCIS Library System</title>
-    
+    <!-- FAVICON (High Quality) -->
+    <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -110,6 +112,10 @@
         body.light-mode .bg-white\/5 { background-color: #f1f5f9 !important; }
         body.light-mode .bg-white\/10 { background-color: #e2e8f0 !important; }
 
+        /* FIX FOR THE SHIELD ICON (text-white/20) */
+        /* In Light Mode, turn it into a faint Blue instead of invisible white */
+        body.light-mode .text-white\/20 { color: #bfdbfe !important; } 
+
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-color); }
         ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
@@ -170,10 +176,8 @@
                         <!-- Avatar Logic -->
                         <div class="relative">
                             @if(Auth::user()->avatar)
-                                <!-- Show Uploaded Image -->
                                 <img src="{{ asset('storage/' . Auth::user()->avatar) }}" class="w-10 h-10 rounded-full object-cover border-2 border-[#2563EB] shadow-lg shadow-blue-900/20 group-hover:scale-105 transition-transform">
                             @else
-                                <!-- Show Default Initials -->
                                 <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] flex items-center justify-center text-white font-bold shadow-lg shadow-blue-900/20 group-hover:scale-105 transition-transform">
                                     {{ substr(Auth::user()->name ?? 'A', 0, 1) }}
                                 </div>

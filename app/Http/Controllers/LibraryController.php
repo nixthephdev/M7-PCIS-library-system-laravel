@@ -22,25 +22,36 @@ class LibraryController extends Controller
     $borrowedBooks = BookCopy::where('status', 'borrowed')->count();
     
     // 2. Overdue Calculation
-    $overdueCount = BorrowTransaction::whereNull('returned_at')
+    $overdueTransactions = BorrowTransaction::whereNull('returned_at')
                     ->where('due_date', '<', Carbon::now())
-                    ->count();
+                    ->with(['user', 'bookCopy.book'])
+                    ->get();
 
-    // 3. Financials (Total Fines)
-    $totalFines = BorrowTransaction::sum('fine_amount');
+    $overdueCount = $overdueTransactions->count();
 
-    // 4. Recent Activity (Last 5 transactions)
+    // 3. Calculate Financials
+    // A. Collected Fines (Already returned)
+    $collectedFines = BorrowTransaction::sum('fine_amount');
+    
+    // B. Pending Fines (Currently overdue books)
+    $pendingFines = 0;
+    foreach ($overdueTransactions as $trans) {
+        $daysOverdue = Carbon::now()->diffInDays($trans->due_date);
+        $daysOverdue = $daysOverdue == 0 ? 1 : $daysOverdue; // Minimum 1 day
+        $pendingFines += ($daysOverdue * 5); // ₱5 per day
+    }
+
+    // Total = Collected + Pending
+    $totalFines = $collectedFines + $pendingFines;
+
+    // 4. Recent Activity
     $recentActivities = BorrowTransaction::with(['user', 'bookCopy.book'])
                         ->latest()
                         ->take(5)
                         ->get();
 
-    // 5. Overdue List (Specific people who are late)
-    $overdueList = BorrowTransaction::whereNull('returned_at')
-                    ->where('due_date', '<', Carbon::now())
-                    ->with(['user', 'bookCopy.book'])
-                    ->take(5)
-                    ->get();
+    // 5. Overdue List (Pass the collection we already got)
+    $overdueList = $overdueTransactions->take(5);
     
     return view('dashboard', compact(
         'totalBooks', 
@@ -175,8 +186,10 @@ class LibraryController extends Controller
             'accession_number' => 'required|exists:book_copies,accession_number'
         ]);
 
+        // 1. Find the Copy
         $copy = BookCopy::where('accession_number', $request->accession_number)->first();
 
+        // 2. Find the Active Transaction
         $transaction = BorrowTransaction::where('book_copy_id', $copy->id)
                         ->whereNull('returned_at')
                         ->first();
@@ -185,20 +198,32 @@ class LibraryController extends Controller
             return back()->with('error', 'This book is not currently marked as borrowed.');
         }
 
+        // 3. Mark as Returned
         $transaction->update([
             'returned_at' => Carbon::now()
         ]);
 
+        // 4. Calculate Fine (₱5.00 per day)
+        $fine = 0;
         if (Carbon::now()->gt($transaction->due_date)) {
             $daysOverdue = Carbon::now()->diffInDays($transaction->due_date);
-            $transaction->update(['fine_amount' => $daysOverdue * 5]);
+            // If less than 1 day but technically late, charge for 1 day, else calculate total
+            $daysOverdue = $daysOverdue == 0 ? 1 : $daysOverdue; 
+            
+            $fine = $daysOverdue * 5; // ₱5 per day
+            $transaction->update(['fine_amount' => $fine]);
         }
 
+        // 5. Update Book Status
         $copy->update(['status' => 'available']);
+
+        // 6. Return Message
+        if ($fine > 0) {
+            return back()->with('error', 'Book Returned. OVERDUE! Collect Fine: ₱' . number_format($fine, 2));
+        }
 
         return back()->with('success', 'Book returned successfully.');
     }
-
     // ==========================================
     // 4. MEMBER MANAGEMENT (Users)
     // ==========================================

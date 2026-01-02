@@ -22,7 +22,7 @@
                     <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Student ID / Card Scan</label>
                     <div class="relative mt-2">
                         <i class="fas fa-id-card absolute left-4 top-3.5 text-slate-500"></i>
-                        <input type="text" name="student_id" class="w-full pl-10 pr-4 py-3 glass-input rounded-xl font-medium font-mono" placeholder="Scan ID Card (e.g. 2024-001)..." required autofocus>
+                        <input type="text" name="student_id" class="w-full pl-10 pr-4 py-3 glass-input rounded-xl font-medium font-mono" placeholder="Scan ID Card (e.g. IB0001)..." required autofocus>
                     </div>
                 </div>
                 <div>

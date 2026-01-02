@@ -47,21 +47,21 @@
                 <!-- STUDENT ID -->
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Student ID</label>
-                    <input type="text" name="student_id" class="w-full glass-input rounded-xl px-4 py-3 font-mono" placeholder="e.g. 2024-0056" required>
+                    <input type="text" name="student_id" class="w-full glass-input rounded-xl px-4 py-3 font-mono" placeholder="e.g. IB0001" required>
                     @error('student_id') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Name -->
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Full Name</label>
-                    <input type="text" name="name" class="w-full glass-input rounded-xl px-4 py-3" placeholder="e.g. John Doe" required>
+                    <input type="text" name="name" class="w-full glass-input rounded-xl px-4 py-3" placeholder="e.g. Juan Dela Cruz" required>
                     @error('name') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Email -->
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Email Address</label>
-                    <input type="email" name="email" class="w-full glass-input rounded-xl px-4 py-3" placeholder="e.g. john@school.edu" required>
+                    <input type="email" name="email" class="w-full glass-input rounded-xl px-4 py-3" placeholder="e.g. student@pcis.edu.ph" required>
                     @error('email') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                 </div>
                 

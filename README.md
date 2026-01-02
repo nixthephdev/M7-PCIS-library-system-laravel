@@ -1,66 +1,125 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 📚 M7 PCIS Library Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Version:** 1.0.0  
+**Developer:** Nikko Calumpiano  
+**Framework:** Laravel 10/11 + Tailwind CSS  
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Project Overview
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+The **M7 PCIS Library Management System** is a comprehensive web application designed to streamline library operations for M7 PCIS School. It manages the entire lifecycle of book circulation, student memberships, inventory tracking, and financial reporting (fines).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+The system features a **Premium "Glassmorphism" UI** with a fully functional, persistent **Dark/Light Mode** engine.
 
-## Learning Laravel
+### 🛠 Technical Stack
+*   **Backend:** Laravel Framework (PHP)
+*   **Database:** MySQL (via PHPMyAdmin)
+*   **Frontend:** Blade Templates, Tailwind CSS (CDN)
+*   **Icons:** FontAwesome 6 (Free)
+*   **Scripting:** Vanilla JavaScript (Modals, Theme Toggling, AJAX)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## 🗄 Database Architecture
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+The system uses a normalized relational database schema to separate abstract book titles from physical copies.
 
-## Laravel Sponsors
+### 1. `users` Table
+Stores both Administrators and Students.
+*   `id`: Primary Key.
+*   `student_id`: **(Unique)** Official School ID (e.g., `2024-001`). Nullable for Admins.
+*   `name`: Full Name.
+*   `email`: Email Address.
+*   `password`: Hashed Password.
+*   `role`: Enum (`'admin'`, `'member'`). Controls access to the dashboard.
+*   `avatar`: Path to profile picture (linked to `storage/public/avatars`).
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+### 2. `books` Table
+Stores metadata for book titles.
+*   `id`: Primary Key.
+*   `isbn`: International Standard Book Number.
+*   `title`: Book Title.
+*   `author`: Author Name.
+*   `publication_year`: Year.
 
-### Premium Partners
+### 3. `book_copies` Table
+Represents physical items on the shelf.
+*   `id`: Primary Key.
+*   `book_id`: Foreign Key (links to `books`).
+*   `accession_number`: **(Unique)** Barcode ID (e.g., `BK-82910`).
+*   `status`: Enum (`'available'`, `'borrowed'`, `'lost'`).
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+### 4. `borrow_transactions` Table
+Records circulation history.
+*   `id`: Primary Key.
+*   `user_id`: Foreign Key (Borrower).
+*   `book_copy_id`: Foreign Key (Item).
+*   `borrowed_at`: DateTime.
+*   `due_date`: DateTime (+7 days from borrow).
+*   `returned_at`: Nullable DateTime (NULL = Active Loan).
+*   `fine_amount`: Decimal (Calculated dynamically or upon return).
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🌟 Core Modules & Features
 
-## Code of Conduct
+### 🔐 1. Authentication & RBAC
+*   **Middleware Protection:** Custom `IsAdmin` middleware ensures only users with `role='admin'` can access the dashboard.
+*   **Custom Login:** Premium split-screen design with glassmorphism effects.
+*   **Profile Management:** Admins can update credentials and **upload profile pictures** which reflect globally across the system.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 📦 2. Inventory Management
+*   **Stock In:** Automatically generates unique `book_copies` based on quantity entered.
+*   **Catalog View:** Displays "Available vs Total" counts (e.g., "4 / 5").
+*   **Drill-Down:** Clicking a book reveals specific copy details and current borrower info.
+*   **Edit Modal:** Update Title, Author, or ISBN via a popup modal.
 
-## Security Vulnerabilities
+### 🔄 3. Circulation (In/Out)
+*   **Borrowing:**
+    *   Uses **Student ID** (e.g., `2024-0056`) instead of database ID.
+    *   Uses **Barcode/Accession #** for items.
+*   **Returning:**
+    *   Auto-calculates fines based on `due_date`.
+    *   **Fine Logic:** ₱5.00 per day overdue.
+    *   Alerts the librarian immediately if a fine needs to be collected upon return.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 👥 4. Member Management
+*   **Separated Views:**
+    *   **Top Section:** Grid view for Admins & Librarians.
+    *   **Bottom Section:** Table view for Registered Students.
+*   **Avatar Logic:** Displays uploaded photo; falls back to Initials (e.g., "NC") if no photo exists.
+*   **CRUD:** Full Create, Read, Update, Delete functionality for members.
 
-## License
+### 📊 5. Dashboard Command Center
+*   **Financials:** Tracks **Total Fines** (Collected + Pending).
+*   **Overdue Alerts:** A dedicated sidebar showing specific students who are late and the **exact amount** they owe in real-time.
+*   **Recent Activity:** Live feed of the last 5 transactions.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## 🎨 UI/UX Design System
+
+The system uses a custom **"M7 Premium"** theme.
+
+### Color Palette
+*   **Primary (Blue):** `#2563EB` (Tailwind `blue-600`)
+*   **Accent (Red):** `#EF4444` (Tailwind `red-500`)
+*   **Dark Mode BG:** `#0B1120` (Midnight Navy)
+*   **Light Mode BG:** `#F8FAFC` (Slate 50)
+
+### Dark / Light Mode Engine
+*   Uses **CSS Variables** and **LocalStorage** to persist user preference.
+*   Includes specific overrides to ensure pale text turns dark in Light Mode for maximum readability.
+
+---
+
+## ⚙️ Installation Guide
+
+Follow these steps to set up the project on a local machine.
+
+### 1. Clone & Install
+```bash
+git clone <repository-url>
+cd library_system
+composer install
