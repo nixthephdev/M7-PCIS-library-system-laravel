@@ -13,4 +13,9 @@ class BookCopy extends Model
     public function book() {
         return $this->belongsTo(Book::class);
     }
+
+    public function borrowTransactions()
+    {
+        return $this->hasMany(BorrowTransaction::class);
+    }
 }
