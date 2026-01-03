@@ -3,7 +3,7 @@
 @section('content')
 <div class="max-w-5xl mx-auto">
     
-    <!-- HEADER SECTION -->
+    <!-- HEADER -->
     <div class="flex items-center justify-between mb-8">
         <a href="{{ route('inventory.index') }}" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors group">
             <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#2563EB] group-hover:text-white transition-all">
@@ -18,7 +18,6 @@
         <div class="absolute top-0 right-0 w-64 h-64 bg-[#2563EB] rounded-full blur-[100px] opacity-20 -mr-10 -mt-10 pointer-events-none"></div>
         
         <div class="relative z-10 flex flex-col md:flex-row gap-8 items-start">
-            <!-- Book Icon -->
             <div class="w-32 h-40 rounded-2xl bg-gradient-to-br from-[#2563EB] to-[#1e3a8a] flex items-center justify-center shadow-2xl flex-shrink-0">
                 <i class="fas fa-book text-5xl text-white/50"></i>
             </div>
@@ -28,9 +27,7 @@
                     <div>
                         <div class="flex items-center gap-3 mb-2">
                             <h1 class="text-4xl font-black text-white">{{ $book->title }}</h1>
-                            
-                            <!-- EDIT BUTTON -->
-                            <button onclick="openEditModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-[#2563EB] flex items-center justify-center text-white transition-all" title="Edit Details">
+                            <button onclick="openEditModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-[#2563EB] flex items-center justify-center text-white transition-all" title="Edit Details & Stock">
                                 <i class="fas fa-pen text-xs"></i>
                             </button>
                         </div>
@@ -67,9 +64,10 @@
             <table class="w-full text-left">
                 <thead class="bg-white/5 text-slate-400 text-xs uppercase font-bold tracking-wider">
                     <tr>
-                        <th class="px-8 py-5">Accession # (Barcode)</th>
-                        <th class="px-6 py-5 text-center">Current Status</th>
-                        <th class="px-6 py-5">Current Location / Borrower</th>
+                        <th class="px-8 py-5">Accession #</th>
+                        <th class="px-6 py-5 text-center">Status</th>
+                        <th class="px-6 py-5">Location / Borrower</th>
+                        <th class="px-6 py-5 text-right">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5">
@@ -93,33 +91,34 @@
                         </td>
                         <td class="px-6 py-5">
                             @if($copy->status == 'borrowed')
-                                @php 
-                                    $activeTrans = $copy->borrowTransactions->whereNull('returned_at')->first();
-                                @endphp
-                               @if($activeTrans)
-    <div class="flex items-center gap-3">
-        <!-- AVATAR LOGIC -->
-        @if($activeTrans->user->avatar)
-            <img src="{{ asset('storage/' . $activeTrans->user->avatar) }}" class="w-8 h-8 rounded-full object-cover border border-white/20">
-        @else
-            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] flex items-center justify-center text-white text-xs font-bold">
-                {{ substr($activeTrans->user->name, 0, 1) }}
-            </div>
-        @endif
-
-        <div>
-            <p class="text-sm font-bold text-white">{{ $activeTrans->user->name }}</p>
-            <p class="text-xs text-slate-400">Due: {{ \Carbon\Carbon::parse($activeTrans->due_date)->format('M d') }}</p>
-        </div>
-    </div>
-@else
-                                    <span class="text-slate-500 italic">Data inconsistency</span>
+                                @php $activeTrans = $copy->borrowTransactions->whereNull('returned_at')->first(); @endphp
+                                @if($activeTrans)
+                                    <div class="flex items-center gap-3">
+                                        @if($activeTrans->user->avatar)
+                                            <img src="{{ asset('storage/' . $activeTrans->user->avatar) }}" class="w-8 h-8 rounded-full object-cover border border-white/20">
+                                        @else
+                                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] flex items-center justify-center text-white text-xs font-bold">
+                                                {{ substr($activeTrans->user->name, 0, 1) }}
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <p class="text-sm font-bold text-white">{{ $activeTrans->user->name }}</p>
+                                            <p class="text-xs text-slate-400">Due: {{ \Carbon\Carbon::parse($activeTrans->due_date)->format('M d') }}</p>
+                                        </div>
+                                    </div>
                                 @endif
                             @else
-                                <span class="text-slate-400 flex items-center gap-2">
-                                    <i class="fas fa-archive"></i> On Shelf
-                                </span>
+                                <span class="text-slate-400 flex items-center gap-2"><i class="fas fa-archive"></i> On Shelf</span>
                             @endif
+                        </td>
+                        <!-- DELETE BUTTON -->
+                        <td class="px-6 py-5 text-right">
+                            <form action="{{ route('copy.delete', $copy->id) }}" method="POST" onsubmit="return confirm('Are you sure this copy is lost/damaged? This cannot be undone.');">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all" title="Remove Copy (Lost/Damaged)">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     @endforeach
@@ -127,20 +126,13 @@
             </table>
         </div>
     </div>
-
 </div>
 
-<!-- ========================================== -->
-<!-- EDIT MODAL (POPUP) -->
-<!-- ========================================== -->
+<!-- EDIT MODAL -->
 <div id="editModal" class="fixed inset-0 z-50 hidden">
-    <!-- Backdrop -->
     <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeEditModal()"></div>
-    
-    <!-- Modal Content -->
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md">
         <div class="glass-card rounded-3xl p-8 border border-white/10 relative overflow-hidden">
-            
             <h3 class="text-2xl font-bold text-white mb-6">Edit Book Details</h3>
             
             <form action="{{ route('inventory.update', $book->id) }}" method="POST" class="space-y-5">
@@ -157,6 +149,15 @@
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2">ISBN</label>
                     <input type="text" name="isbn" value="{{ $book->isbn }}" class="w-full glass-input rounded-xl px-4 py-3 font-medium" required>
                 </div>
+                
+                <!-- ADD COPIES FIELD -->
+                <div class="pt-4 border-t border-white/10">
+                    <label class="block text-xs font-bold text-[#2563EB] uppercase mb-2">Add More Copies</label>
+                    <div class="flex gap-2">
+                        <input type="number" name="add_copies" class="w-full glass-input rounded-xl px-4 py-3 font-medium" placeholder="Qty to add (e.g. 5)">
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1">Leave empty if you don't want to add stock.</p>
+                </div>
 
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="closeEditModal()" class="flex-1 py-3 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-all">Cancel</button>
@@ -168,11 +169,7 @@
 </div>
 
 <script>
-    function openEditModal() {
-        document.getElementById('editModal').classList.remove('hidden');
-    }
-    function closeEditModal() {
-        document.getElementById('editModal').classList.add('hidden');
-    }
+    function openEditModal() { document.getElementById('editModal').classList.remove('hidden'); }
+    function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
 </script>
 @endsection

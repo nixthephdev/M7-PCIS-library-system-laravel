@@ -15,53 +15,54 @@ class LibraryController extends Controller
     // ==========================================
     // 1. DASHBOARD
     // ==========================================
-    public function index()
-{
-    // 1. Basic Stats
-    $totalBooks = BookCopy::count();
-    $borrowedBooks = BookCopy::where('status', 'borrowed')->count();
-    
-    // 2. Overdue Calculation
-    $overdueTransactions = BorrowTransaction::whereNull('returned_at')
-                    ->where('due_date', '<', Carbon::now())
-                    ->with(['user', 'bookCopy.book'])
-                    ->get();
+   public function index()
+    {
+        // 1. Basic Stats
+        $totalBooks = BookCopy::count();
+        $borrowedBooks = BookCopy::where('status', 'borrowed')->count();
+        
+        // 2. Overdue Calculation (With Trashed Books)
+        $overdueTransactions = BorrowTransaction::whereNull('returned_at')
+                        ->where('due_date', '<', Carbon::now())
+                        ->with(['user', 'bookCopy' => function($query) {
+                            $query->withTrashed(); // <--- FIX: Load copy even if deleted
+                        }, 'bookCopy.book'])
+                        ->get();
 
-    $overdueCount = $overdueTransactions->count();
+        $overdueCount = $overdueTransactions->count();
 
-    // 3. Calculate Financials
-    // A. Collected Fines (Already returned)
-    $collectedFines = BorrowTransaction::sum('fine_amount');
-    
-    // B. Pending Fines (Currently overdue books)
-    $pendingFines = 0;
-    foreach ($overdueTransactions as $trans) {
-        $daysOverdue = Carbon::now()->diffInDays($trans->due_date);
-        $daysOverdue = $daysOverdue == 0 ? 1 : $daysOverdue; // Minimum 1 day
-        $pendingFines += ($daysOverdue * 5); // ₱5 per day
-    }
+        // 3. Calculate Financials
+        $collectedFines = BorrowTransaction::sum('fine_amount');
+        
+        $pendingFines = 0;
+        foreach ($overdueTransactions as $trans) {
+            $daysOverdue = Carbon::now()->diffInDays($trans->due_date);
+            $daysOverdue = $daysOverdue == 0 ? 1 : $daysOverdue;
+            $pendingFines += ($daysOverdue * 5);
+        }
 
-    // Total = Collected + Pending
-    $totalFines = $collectedFines + $pendingFines;
+        $totalFines = $collectedFines + $pendingFines;
 
-    // 4. Recent Activity
-    $recentActivities = BorrowTransaction::with(['user', 'bookCopy.book'])
+        // 4. Recent Activity (With Trashed Books)
+        $recentActivities = BorrowTransaction::with(['user', 'bookCopy' => function($query) {
+                            $query->withTrashed(); // <--- FIX: Load copy even if deleted
+                        }, 'bookCopy.book'])
                         ->latest()
                         ->take(5)
                         ->get();
 
-    // 5. Overdue List (Pass the collection we already got)
-    $overdueList = $overdueTransactions->take(5);
-    
-    return view('dashboard', compact(
-        'totalBooks', 
-        'borrowedBooks', 
-        'overdueCount', 
-        'totalFines', 
-        'recentActivities',
-        'overdueList'
-    ));
-}
+        // 5. Overdue List
+        $overdueList = $overdueTransactions->take(5);
+        
+        return view('dashboard', compact(
+            'totalBooks', 
+            'borrowedBooks', 
+            'overdueCount', 
+            'totalFines', 
+            'recentActivities',
+            'overdueList'
+        ));
+    }
 
     // ==========================================
     // 2. INVENTORY (Books)
@@ -120,24 +121,49 @@ class LibraryController extends Controller
     }
 
     public function updateBook(Request $request, $id)
-    {
-        $request->validate([
-            'title' => 'required',
-            'author' => 'required',
-            'isbn' => 'required'
-        ]);
+{
+    $request->validate([
+        'title' => 'required',
+        'author' => 'required',
+        'isbn' => 'required',
+        'add_copies' => 'nullable|integer|min:1' // New validation
+    ]);
 
-        $book = Book::findOrFail($id);
-        
-        $book->update([
-            'title' => $request->title,
-            'author' => $request->author,
-            'isbn' => $request->isbn
-        ]);
+    $book = Book::findOrFail($id);
+    
+    // 1. Update Details
+    $book->update([
+        'title' => $request->title,
+        'author' => $request->author,
+        'isbn' => $request->isbn
+    ]);
 
-        return back()->with('success', 'Book details updated successfully!');
+    // 2. Add New Copies (If requested)
+    if ($request->filled('add_copies')) {
+        for ($i = 0; $i < $request->add_copies; $i++) {
+            BookCopy::create([
+                'book_id' => $book->id,
+                'accession_number' => 'BK-' . mt_rand(100000, 999999), 
+                'status' => 'available'
+            ]);
+        }
     }
 
+    return back()->with('success', 'Book details updated successfully!');
+}
+    public function deleteCopy($id)
+{
+    $copy = BookCopy::findOrFail($id);
+
+    // Safety Check: Don't delete if someone is borrowing it!
+    if ($copy->status == 'borrowed') {
+        return back()->with('error', 'Cannot remove this copy. It is currently borrowed by a student.');
+    }
+
+    $copy->delete();
+
+    return back()->with('success', 'Copy removed from inventory.');
+}
     // ==========================================
     // 3. CIRCULATION (Borrow/Return)
     // ==========================================

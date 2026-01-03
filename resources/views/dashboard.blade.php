@@ -33,9 +33,10 @@
                 <p class="hero-subtitle text-slate-300">Here is your library's performance overview.</p>
             </div>
             <div class="flex gap-3">
-                <a href="{{ route('circulation.index') }}" class="px-5 py-2.5 bg-white/10 text-white rounded-xl font-bold hover:bg-white/20 transition-all border border-white/10 backdrop-blur-sm">
-                    <i class="fas fa-qrcode mr-2"></i> Circulation
-                </a>
+                <a href="{{ route('circulation.index') }}" 
+   class="px-5 py-2.5 bg-white/10 text-white rounded-xl font-bold transition-all border border-white/10 backdrop-blur-sm shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:bg-white hover:text-[#0B1120]">
+    <i class="fas fa-qrcode mr-2"></i> Circulation
+</a>
                 <a href="{{ route('inventory.index') }}" class="px-5 py-2.5 bg-[#2563EB] text-white rounded-xl font-bold shadow-lg hover:bg-blue-600 transition-all transform hover:-translate-y-1">
                     <i class="fas fa-plus mr-2"></i> Add Books
                 </a>

@@ -33,7 +33,7 @@ class AuthController extends Controller
     $user->name = $request->name;
     $user->email = $request->email;
 
-    // 2. Handle Avatar Upload
+    // 2. Handle Avatar Uploadresources/views/profile.blade.php
     if ($request->hasFile('avatar')) {
         // Delete old avatar if exists (optional cleanup)
         if ($user->avatar) {

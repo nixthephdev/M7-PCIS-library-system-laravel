@@ -33,6 +33,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::post('/add', [LibraryController::class, 'storePurchase'])->name('inventory.store');
         Route::get('/book/{id}', [LibraryController::class, 'showBook'])->name('inventory.show');
         Route::post('/book/update/{id}', [LibraryController::class, 'updateBook'])->name('inventory.update');
+        Route::delete('/copy/delete/{id}', [LibraryController::class, 'deleteCopy'])->name('copy.delete');
     });
 
     // Circulation
