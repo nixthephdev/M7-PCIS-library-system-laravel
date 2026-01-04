@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash; 
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Illuminate\Auth\Events\PasswordReset;
 
 class AuthController extends Controller
 {
@@ -94,5 +97,61 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/login');
+    }
+
+    // 1. Show the Forgot Password View
+    public function showForgotPassword()
+    {
+        return view('forgot-password');
+    }
+
+    // 2. Handle the Form Submission (Send Link)
+    public function sendResetLink(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        // Send link using the 'log' driver configured in .env
+        $status = Password::sendResetLink($request->only('email'));
+
+        if ($status === Password::RESET_LINK_SENT) {
+            return back()->with('success', 'Reset link sent! Check your logs.');
+        }
+
+        return back()->withErrors(['email' => __($status)]);
+    }
+
+    // 3. Show the Reset Password Form (After clicking link)
+    public function showResetForm(Request $request, $token = null)
+    {
+        return view('reset-password')->with(['token' => $token, 'email' => $request->email]);
+    }
+
+    // 4. Handle the Password Update
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => bcrypt($password)
+                ])->setRememberToken(Str::random(60));
+
+                $user->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            return redirect()->route('login')->with('success', 'Password has been reset!');
+        }
+
+        return back()->withErrors(['email' => __($status)]);
     }
 }

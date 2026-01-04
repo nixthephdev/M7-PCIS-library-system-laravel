@@ -120,7 +120,12 @@
                     <input type="password" name="password" class="w-full pl-11 pr-4 py-3.5 rounded-xl glass-input outline-none placeholder-gray-600 font-medium" placeholder="••••••••" required>
                 </div>
             </div>
-
+            <!-- Forgot Password Link -->
+            <div class="flex justify-end">
+                <a href="{{ route('password.request') }}" class="text-xs font-bold text-[#2563EB] hover:text-blue-400 hover:underline transition-colors">
+                    Forgot Password?
+                </a>
+            </div>
             <!-- Submit Button -->
             <button type="submit" class="w-full py-4 bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 group mt-4">
                 <span>Sign In to Dashboard</span>
@@ -147,7 +152,7 @@
         <p class="text-[10px] text-gray-500 uppercase tracking-[0.2em] mb-1">
             System Architecture & Development by
         </p>
-        <p class="text-sm text-gray-300 font-bold tracking-wide">
+        <p class="text-[10px] text-gray-300 font-bold tracking-wide">
             Nikko Calumpiano
         </p>
     </div>
